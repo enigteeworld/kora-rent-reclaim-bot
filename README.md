@@ -1,44 +1,39 @@
-# Automated Rent Reclaim Bot (for Kora Operators)
+# Kora Automated Rent Reclaim Bot (Solana)
 
-This repository contains a small Solana utility that helps operators reclaim SOL locked in **empty SPL token accounts**. It is designed with Kora operators in mind, but it can also be used as a standalone tool with any standard Solana keypair.
+An automated bot that scans a Solana operator wallet for **empty SPL Token accounts** and safely **reclaims rent** by closing them. Designed for **Kora operators**, but works in standalone mode as well.
 
-The bot is intentionally conservative and prioritizes safety, auditability, and clear reporting.
-
----
-
-## What this tool does
-
-- Scans all SPL token accounts owned by an operator wallet
-- Identifies accounts that are safe to close:
-  - token balance is zero
-  - close authority is owned by the operator
-  - rent reclaimed meets an optional minimum threshold
-- Sorts reclaimable accounts by rent amount (highest first)
-- Closes a limited number per run to avoid risky batch behavior
-- Returns reclaimed SOL directly to the operator wallet
-- Produces clear logs and optional JSON output for audits or automation
+This project was built as a submission for the **Superteam Beginner Developer Challenge – Automated Rent Reclaim Bot for Kora Operators**.
 
 ---
 
-## Supported operation modes
+##  What this bot does
 
-- **One-time run**
-- **Watch mode** (periodic scans, cron-style)
-- **Dry run** (no on-chain changes)
-- **JSON reporting** (machine-readable output)
+* Scans all SPL token accounts owned by an operator wallet
+* Identifies accounts that are:
+
+  * empty (`amount == 0`)
+  * safely closable by the operator
+  * above a configurable rent threshold
+* Sorts candidates by **highest rent first**
+* Closes a limited number per run
+* Reclaims SOL rent back to the operator wallet
+* Supports **dry‑run**, **one‑shot**, and **watch (interval)** modes
+* Outputs a **machine‑readable JSON report** for automation & auditing
 
 ---
 
-## Safety model
+## Safety guarantees
 
-This bot will **not**:
+This bot is intentionally conservative:
 
-- Close token accounts with a non-zero balance
-- Close token accounts the operator does not control
-- Close accounts below a configurable rent threshold
-- Execute transactions when `DRY_RUN=1`
+* Only scans token accounts **owned by the operator wallet**
+* Skips non‑empty token accounts
+* Skips accounts with an incompatible `closeAuthority`
+* Optional minimum rent threshold (`MIN_RENT_LAMPORTS`)
+* `DRY_RUN=1` mode for inspection before any on‑chain action
+* Optional Kora transaction path (stubbed, opt‑in)
 
-An optional mint allowlist can also be used to further restrict which accounts are eligible.
+No accounts are closed unless all checks pass.
 
 ---
 
@@ -132,19 +127,15 @@ Example JSON output:
 
 ```json
 {
-  "ts": "2026-01-29T00:35:13.515Z",
-  "scanned": 12,
-  "candidates": 2,
-  "planned": 2,
-  "closed": 2,
-  "signatures": ["<tx_sig_1>", "<tx_sig_2>"],
-  "skippedNonEmpty": 8,
-  "skippedWrongAuthority": 1,
-  "skippedBelowMinRent": 1,
-  "skippedNotAllowedMint": 0,
-  "parseErrors": 0
+  "ts": "2026-01-29T00:46:40.585Z",
+  "scanned": 1,
+  "candidates": 1,
+  "planned": 1,
+  "closed": 1,
+  "signatures": [
+    "3SMgfdRrfvVJCPHmJX1B6ZRtvwVZeCAoEJGuJrpHmQrjXeDvZ6xNA8wfJ6mTD6Q3D9tBqFwxrfG33GKVoDm8Pq58"
+  ]
 }
-
 ```
 
 ### Continuous watch mode
@@ -180,25 +171,11 @@ The bot should detect the empty account and close it, reclaiming the rent.
 
 The code includes a clean abstraction for submitting transactions via Kora. At the moment this path is stubbed out, but the structure is intentionally designed to support:
 
-* sponsored transaction fees
-* RPC-based signing and submission
-* operator-safe automation workflows
-
-This keeps the bot usable today while making future Kora-native integration straightforward.
-
----
-## How Kora sponsorship fits
-
-In direct mode (USE_KORA=0), the operator wallet signs and submits transactions directly and pays network fees.
-
-In a Kora-sponsored flow, the operator would still approve the action (sign intent or transaction), but submission and/or fees can be handled by a sponsor via Kora’s infrastructure. This allows rent reclaim to run without requiring the operator to maintain SOL balances for fees.
-
-In the codebase, this distinction is isolated to the transaction submission step. The core reclaim logic remains the same, and switching between direct and sponsored execution is handled via configuration.
-
-## Why this exists
-
-Operators tend to accumulate a lot of empty token accounts over time. Each one locks a small amount of SOL, and manually cleaning them up doesn’t scale. This tool automates that process in a way that’s predictable, inspectable, and safe to run unattended.
+* Sponsored fees
+* `signAndSendTransaction` JSON‑RPC
+* Operator‑safe automation
 
 ---
 
 
+Built with ❤️ on Solana for Kora operators.
