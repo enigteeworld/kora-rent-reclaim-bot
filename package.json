@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx src/index.ts",
+    "telegram": "tsx src/telegram.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js"
   },
@@ -12,6 +13,7 @@
     "@solana/spl-token": "^0.4.9",
     "@solana/web3.js": "^1.98.4",
     "dotenv": "^16.4.5",
+    "grammy": "^1.39.3",
     "pino": "^9.3.2",
     "pino-pretty": "^11.2.2",
     "zod": "^3.23.8"
