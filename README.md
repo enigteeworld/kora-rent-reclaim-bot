@@ -158,20 +158,6 @@ Currently stubbed, but designed to support:
 
 ---
 
-## 🏆 Why this fits the bounty
 
-* Real on‑chain execution (not a mock)
-* Clear operator safety model
-* Production‑ready structure
-* Auditable JSON reports
-* Easy extension for Kora infra
-
----
-
-## 📜 License
-
-MIT
-
----
 
 Built with ❤️ on Solana for Kora operators.
